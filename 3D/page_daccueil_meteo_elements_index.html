@@ -234,11 +234,9 @@
     const GOOGLE_CLIENT_ID = "627927284714-f11a1jfo7h36o57j8rem5ugjpdu1ka3o.apps.googleusercontent.com";
     const SUPABASE_URL = "https://fkneemlnxqbgdyhdtaet.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrbmVlbWxueHFiZ2R5aGR0YWV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMDk3MjcsImV4cCI6MjA4MDg4NTcyN30.EH7qrY4qVT-Tktfzjd3gI1pYIpHi_q9Z_dwATIo_0-0";
-
-    // Initialisation de Supabase
+    
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-    // Variable globale pour stocker l'email de l'utilisateur connecté
+    
     let currentUserEmail = null;
 
     // --- FONCTIONS GOOGLE ---
@@ -255,24 +253,22 @@
     async function handleCredentialResponse(response) {
         const data = decodeJwtResponse(response.credential);
 
-        // 1. Mise à jour UI du Header
+        // Mise à jour UI du Header
         document.getElementById("user-name").innerText = data.name;
         document.getElementById("user-avatar").src = data.picture;
         const btnContainer = document.getElementById("google-button-container");
         if(btnContainer) btnContainer.remove();
         document.getElementById("user-menu").style.cursor = "default";
 
-        // 2. Gestion de l'affichage de la section favoris
+        // Gestion de l'affichage de la section favoris
         // On cache le message rouge
         document.getElementById("not-connected-msg").style.display = "none";
         // On affiche le conteneur du carrousel
         document.getElementById("connected-content").style.display = "block";
-
-        // 3. Sauvegarde de l'email pour Supabase
+        
         currentUserEmail = data.email;
         console.log("Utilisateur connecté : " + currentUserEmail);
-
-        // 4. Charger les favoris depuis la base de données
+        
         await loadFavorites();
     }
 
@@ -304,15 +300,14 @@
 
             if(error) console.error("Erreur ajout", error);
         }
-
-        // IMPORTANT : On recharge tout l'affichage (cœurs + carrousel)
+        
         await loadFavorites();
     }
 
     async function loadFavorites() {
         if (!currentUserEmail) return;
 
-        // 1. On récupère la liste des favoris depuis Supabase
+        // On récupère la liste des favoris depuis Supabase
         const { data, error } = await supabase
             .from('favoris')
             .select('card_name')
@@ -323,15 +318,14 @@
             return;
         }
 
-        // 2. Gestion de l'affichage de la section Carrousel
+        // Gestion de l'affichage de la section Carrousel
         const favSection = document.getElementById("favorites-section");
         const favContainer = document.getElementById("favorites-container");
 
         if(!favSection || !favContainer) return;
 
         favContainer.innerHTML = "";
-
-        // On remet tous les cœurs à zéro (gris)
+        
         document.querySelectorAll('.heart-icon').forEach(icon => {
             icon.innerText = "♡";
             icon.style.color = "#ccc";
@@ -343,7 +337,6 @@
             favSection.style.display = "none";
             return;
         } else {
-            // S'il y a des données, on s'assure que la section est visible
             favSection.style.display = "block";
         }
 
