@@ -56,7 +56,7 @@
             display: grid; gap: 20px;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         }
-        
+
         a.card {
             background: #2d6fa8;
             padding: 20px;
@@ -64,14 +64,14 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.2);
             transition: transform .2s;
             color: #ffffff;
-            display: block; 
-            text-decoration: none; 
+            display: block;
+            text-decoration: none;
         }
 
         a.card:hover{ transform: scale(1.02); cursor:pointer; }
         a.card h3 { margin-top: 0; color: #fff; }
         a.card p { color: #ddd; }
-        
+
         .heart-icon {
             cursor:pointer;
             font-size:1.5rem;
@@ -97,10 +97,152 @@
             text-align: center; padding: 20px; margin-top: 40px;
             background: #e89a59; color: #001A66;
         }
+
+        /* Styles pour la notation par étoiles */
+        .rating-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .star-rating {
+            display: flex;
+            direction: rtl; /* Inverse l'ordre pour que 5 étoiles soit à gauche */
+            font-size: 1.5rem;
+            position: relative;
+        }
+        .star-rating input[type="radio"] {
+            display: none;
+        }
+        .star-rating label {
+            color: #888; /* Couleur des étoiles non cochées */
+            cursor: pointer;
+            padding: 0 2px;
+            transition: color 0.2s;
+        }
+        /* Style des étoiles au survol */
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: gold;
+        }
+        /* Style des étoiles cochées */
+        .star-rating input[type="radio"]:checked ~ label {
+            color: gold;
+        }
+        /* Affichage de la note moyenne */
+        .average-rating {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #e89a59;
+            margin-left: 10px;
+        }
+        .avg-stars {
+            color: gold;
+            font-size: 1.2rem;
+            letter-spacing: -2px;
+        }
+        .user-stars {
+            pointer-events: auto;
+        }
+
+        /* NOUVEAU: Styles pour le formulaire de suggestion (Menu dépliant) */
+        #suggestion-form-section {
+            background: #2d6fa8;
+            padding: 0; /* Retirer le padding ici pour le mettre sur le contenu */
+            border-radius: 10px;
+            margin-top: 40px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        #suggestion-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            background: #e89a59; /* Couleur du bouton de déploiement */
+            color: #001A66;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        #suggestion-toggle:hover {
+            background: #f0b581;
+        }
+        #suggestion-toggle h2 {
+            margin: 0;
+            color: #001A66; /* Couleur du titre dans le bouton */
+        }
+
+        #toggle-icon {
+            font-size: 1.5rem;
+            transition: transform 0.3s;
+        }
+        #suggestion-toggle.active #toggle-icon {
+            transform: rotate(180deg); /* Faire pivoter la flèche quand ouvert */
+        }
+
+        #suggestion-content-wrapper {
+            max-height: 0; /* Masqué par défaut */
+            overflow: hidden;
+            transition: max-height 0.3s ease-in-out;
+        }
+
+        #suggestion-content-wrapper.open {
+            /* Sera géré par JS pour calculer la hauteur */
+        }
+
+        #suggestion-form-container {
+            padding: 20px 30px; /* Padding pour le contenu du formulaire */
+            color: #ffffff;
+        }
+
+        #suggestion-form label {
+            display: block;
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #ffffff;
+        }
+        #suggestion-form input[type="text"],
+        #suggestion-form textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #001A66;
+            box-sizing: border-box;
+            background-color: #f0f0f0;
+            color: #001A66;
+        }
+        #suggestion-form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        #suggestion-form button[type="submit"] {
+            background: #e89a59;
+            color: #001A66;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        #suggestion-form button[type="submit"]:hover {
+            background: #f0b581;
+        }
+        #suggestion-status {
+            margin-top: 15px;
+            font-weight: bold;
+        }
     </style>
 </head>
 
-<body>
+<body onload="loadAverageRatings()">
 <header>
     <div id="user-menu">
         <div id="google-button-container"></div>
@@ -142,57 +284,172 @@
 
     <section class="sections">
 
-        <a class="card" href="articles/incendies_2025.html">
+        <a class="card" href="articles/incendies_2025.html" data-article-id="incendies_2025">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Incendies de forêts 2025</h3>
                 <span class="heart-icon" data-name="Incendies de forêts 2025" onclick="toggleFavorite(event, this)">♡</span>
             </div>
             <p>Analyse du blocage atmosphérique, statistiques et impacts régionaux.</p>
+            <div class="rating-container">
+                <div class="star-rating user-stars" data-name="Incendies de forêts 2025">
+                    <input type="radio" id="star-5-incendies" name="rating-incendies" value="5" />
+                    <label for="star-5-incendies" onclick="rateArticle(event, 'Incendies de forêts 2025', 5)">★</label>
+                    <input type="radio" id="star-4-incendies" name="rating-incendies" value="4" />
+                    <label for="star-4-incendies" onclick="rateArticle(event, 'Incendies de forêts 2025', 4)">★</label>
+                    <input type="radio" id="star-3-incendies" name="rating-incendies" value="3" />
+                    <label for="star-3-incendies" onclick="rateArticle(event, 'Incendies de forêts 2025', 3)">★</label>
+                    <input type="radio" id="star-2-incendies" name="rating-incendies" value="2" />
+                    <label for="star-2-incendies" onclick="rateArticle(event, 'Incendies de forêts 2025', 2)">★</label>
+                    <input type="radio" id="star-1-incendies" name="rating-incendies" value="1" />
+                    <label for="star-1-incendies" onclick="rateArticle(event, 'Incendies de forêts 2025', 1)">★</label>
+                </div>
+                <div class="average-rating" id="avg-rating-incendies_2025"></div>
+            </div>
         </a>
 
-        <a class="card" href="articles/secheresse_chaleur.html">
+        <a class="card" href="articles/secheresse_chaleur.html" data-article-id="secheresse_chaleur">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Sécheresse & chaleur</h3>
                 <span class="heart-icon" data-name="Sécheresse & chaleur" onclick="toggleFavorite(event, this)">♡</span>
             </div>
             <p>Conditions estivales extrêmes et impacts climatologiques.</p>
+            <div class="rating-container">
+                <div class="star-rating user-stars" data-name="Sécheresse & chaleur">
+                    <input type="radio" id="star-5-secheresse" name="rating-secheresse" value="5" />
+                    <label for="star-5-secheresse" onclick="rateArticle(event, 'Sécheresse & chaleur', 5)">★</label>
+                    <input type="radio" id="star-4-secheresse" name="rating-secheresse" value="4" />
+                    <label for="star-4-secheresse" onclick="rateArticle(event, 'Sécheresse & chaleur', 4)">★</label>
+                    <input type="radio" id="star-3-secheresse" name="rating-secheresse" value="3" />
+                    <label for="star-3-secheresse" onclick="rateArticle(event, 'Sécheresse & chaleur', 3)">★</label>
+                    <input type="radio" id="star-2-secheresse" name="rating-secheresse" value="2" />
+                    <label for="star-2-secheresse" onclick="rateArticle(event, 'Sécheresse & chaleur', 2)">★</label>
+                    <input type="radio" id="star-1-secheresse" name="rating-secheresse" value="1" />
+                    <label for="star-1-secheresse" onclick="rateArticle(event, 'Sécheresse & chaleur', 1)">★</label>
+                </div>
+                <div class="average-rating" id="avg-rating-secheresse_chaleur"></div>
+            </div>
         </a>
 
-        <a class="card" href="articles/ouragan_melissa.html">
+        <a class="card" href="articles/ouragan_melissa.html" data-article-id="ouragan_melissa">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Ouragan Melissa</h3>
                 <span class="heart-icon" data-name="Ouragan Melissa" onclick="toggleFavorite(event, this)">♡</span>
             </div>
             <p>Formation, trajectoire et conséquences de ce système tropical.</p>
+            <div class="rating-container">
+                <div class="star-rating user-stars" data-name="Ouragan Melissa">
+                    <input type="radio" id="star-5-ouragan" name="rating-ouragan" value="5" />
+                    <label for="star-5-ouragan" onclick="rateArticle(event, 'Ouragan Melissa', 5)">★</label>
+                    <input type="radio" id="star-4-ouragan" name="rating-ouragan" value="4" />
+                    <label for="star-4-ouragan" onclick="rateArticle(event, 'Ouragan Melissa', 4)">★</label>
+                    <input type="radio" id="star-3-ouragan" name="rating-ouragan" value="3" />
+                    <label for="star-3-ouragan" onclick="rateArticle(event, 'Ouragan Melissa', 3)">★</label>
+                    <input type="radio" id="star-2-ouragan" name="rating-ouragan" value="2" />
+                    <label for="star-2-ouragan" onclick="rateArticle(event, 'Ouragan Melissa', 2)">★</label>
+                    <input type="radio" id="star-1-ouragan" name="rating-ouragan" value="1" />
+                    <label for="star-1-ouragan" onclick="rateArticle(event, 'Ouragan Melissa', 1)">★</label>
+                </div>
+                <div class="average-rating" id="avg-rating-ouragan_melissa"></div>
+            </div>
         </a>
 
         <div style="text-align:center; margin:25px 0; padding:15px; background:#e89a59; color:#001A66; border-radius:10px; font-weight:bold; font-size:1.2rem; display:block; grid-column:1 / -1; width:97%;">
             Ce qui pourrait vous intéresser
         </div>
 
-        <a class="card" href="articles/neige_quebec.html">
+        <a class="card" href="articles/neige_quebec.html" data-article-id="neige_quebec">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Neige au Québec</h3>
                 <span class="heart-icon" data-name="Neige au Québec" onclick="toggleFavorite(event, this)">♡</span>
             </div>
             <p>Précipitations hivernales et particularités météorologiques.</p>
+            <div class="rating-container">
+                <div class="star-rating user-stars" data-name="Neige au Québec">
+                    <input type="radio" id="star-5-neige" name="rating-neige" value="5" />
+                    <label for="star-5-neige" onclick="rateArticle(event, 'Neige au Québec', 5)">★</label>
+                    <input type="radio" id="star-4-neige" name="rating-neige" value="4" />
+                    <label for="star-4-neige" onclick="rateArticle(event, 'Neige au Québec', 4)">★</label>
+                    <input type="radio" id="star-3-neige" name="rating-neige" value="3" />
+                    <label for="star-3-neige" onclick="rateArticle(event, 'Neige au Québec', 3)">★</label>
+                    <input type="radio" id="star-2-neige" name="rating-neige" value="2" />
+                    <label for="star-2-neige" onclick="rateArticle(event, 'Neige au Québec', 2)">★</label>
+                    <input type="radio" id="star-1-neige" name="rating-neige" value="1" />
+                    <label for="star-1-neige" onclick="rateArticle(event, 'Neige au Québec', 1)">★</label>
+                </div>
+                <div class="average-rating" id="avg-rating-neige_quebec"></div>
+            </div>
         </a>
 
-        <a class="card" href="articles/pressionAcmos.html">
+        <a class="card" href="articles/pressionAcmos.html" data-article-id="pressionAcmos">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Pression atmosphérique</h3>
                 <span class="heart-icon" data-name="Pression atmosphérique" onclick="toggleFavorite(event, this)">♡</span>
             </div>
             <p>Étude spécialisée sur les variations et phénomènes associés.</p>
+            <div class="rating-container">
+                <div class="star-rating user-stars" data-name="Pression atmosphérique">
+                    <input type="radio" id="star-5-pression" name="rating-pression" value="5" />
+                    <label for="star-5-pression" onclick="rateArticle(event, 'Pression atmosphérique', 5)">★</label>
+                    <input type="radio" id="star-4-pression" name="rating-pression" value="4" />
+                    <label for="star-4-pression" onclick="rateArticle(event, 'Pression atmosphérique', 4)">★</label>
+                    <input type="radio" id="star-3-pression" name="rating-pression" value="3" />
+                    <label for="star-3-pression" onclick="rateArticle(event, 'Pression atmosphérique', 3)">★</label>
+                    <input type="radio" id="star-2-pression" name="rating-pression" value="2" />
+                    <label for="star-2-pression" onclick="rateArticle(event, 'Pression atmosphérique', 2)">★</label>
+                    <input type="radio" id="star-1-pression" name="rating-pression" value="1" />
+                    <label for="star-1-pression" onclick="rateArticle(event, 'Pression atmosphérique', 1)">★</label>
+                </div>
+                <div class="average-rating" id="avg-rating-pressionAcmos"></div>
+            </div>
         </a>
 
-        <a class="card" href="articles/fronts.html">
+        <a class="card" href="articles/fronts.html" data-article-id="fronts">
             <div style="display:flex; justify-content:space-between; align-items:center;">
                 <h3>Les fronts</h3>
                 <span class="heart-icon" data-name="Les fronts" onclick="toggleFavorite(event, this)">♡</span>
             </div>
             <p>Fronts froids, chauds et occlus — explications et schémas.</p>
+            <div class="rating-container">
+                <div class="star-rating user-stars" data-name="Les fronts">
+                    <input type="radio" id="star-5-fronts" name="rating-fronts" value="5" />
+                    <label for="star-5-fronts" onclick="rateArticle(event, 'Les fronts', 5)">★</label>
+                    <input type="radio" id="star-4-fronts" name="rating-fronts" value="4" />
+                    <label for="star-4-fronts" onclick="rateArticle(event, 'Les fronts', 4)">★</label>
+                    <input type="radio" id="star-3-fronts" name="rating-fronts" value="3" />
+                    <label for="star-3-fronts" onclick="rateArticle(event, 'Les fronts', 3)">★</label>
+                    <input type="radio" id="star-2-fronts" name="rating-fronts" value="2" />
+                    <label for="star-2-fronts" onclick="rateArticle(event, 'Les fronts', 2)">★</label>
+                    <input type="radio" id="star-1-fronts" name="rating-fronts" value="1" />
+                    <label for="star-1-fronts" onclick="rateArticle(event, 'Les fronts', 1)">★</label>
+                </div>
+                <div class="average-rating" id="avg-rating-fronts"></div>
+            </div>
         </a>
+
+    </section>
+
+    <section id="suggestion-form-section">
+
+        <button id="suggestion-toggle" onclick="toggleSuggestionForm()">
+            <h2>Qu'aimeriez-vous voir sur ce site ?</h2>
+            <span id="toggle-icon">▼</span>
+        </button>
+
+        <div id="suggestion-content-wrapper">
+            <div id="suggestion-form-container">
+                <p>Vos idées nous aident à enrichir le contenu météorologique.</p>
+                <form id="suggestion-form">
+                    <label for="suggestion-title">Titre de l'article suggéré :</label>
+                    <input type="text" id="suggestion-title" name="title" required placeholder="Ex: L'effet de Coriolis sur les vents" maxlength="100">
+
+                    <label for="suggestion-content">Contenu possible / Détails :</label>
+                    <textarea id="suggestion-content" name="content" required placeholder="Décrivez brièvement le sujet que vous aimeriez voir traité."></textarea>
+
+                    <button type="submit">Soumettre la suggestion</button>
+                    <div id="suggestion-status"></div>
+                </form>
+            </div>
+        </div>
 
     </section>
 
@@ -211,7 +468,7 @@
 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     let currentUserEmail = null;
-    
+
     function decodeJwtResponse(token){
         var base64Url = token.split('.')[1];
         var base64 = base64Url.replace(/-/g,'+').replace(/_/g,'/');
@@ -234,15 +491,16 @@
 
             currentUserEmail = data.email;
             await loadFavorites();
+            await loadUserRatings();
         } catch(e) {
             console.error("Erreur connexion", e);
         }
     }
-    
+
     async function toggleFavorite(event, element){
 
         event.preventDefault();
-        event.stopPropagation(); 
+        event.stopPropagation();
 
         const cardName = element.getAttribute("data-name");
 
@@ -252,7 +510,7 @@
         }
 
         const isHeartFull = element.innerText.includes("♥");
-        
+
         element.innerText = isHeartFull ? "♡" : "♥";
         element.style.color = isHeartFull ? "#ccc" : "red";
 
@@ -285,19 +543,214 @@
                 if(originalHeart){
                     originalHeart.innerText = "♥";
                     originalHeart.style.color = "red";
-                    
+
                     const originalCard = originalHeart.closest('.card');
                     const clone = originalCard.cloneNode(true);
-                    
+
+                    // Empêcher le clone des favoris de dupliquer les IDs de notation
+                    // et retirer la section de notation pour éviter les conflits.
+                    const ratingContainer = clone.querySelector('.rating-container');
+                    if (ratingContainer) {
+                        ratingContainer.remove();
+                    }
+
                     favContainer.appendChild(clone);
                 }
             });
         }
     }
 
+    // Fonction pour noter un article
+    async function rateArticle(event, articleName, rating) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const targetLabel = event.target;
+        const targetInputId = targetLabel.getAttribute('for');
+        const targetInput = document.getElementById(targetInputId);
+
+        if(!currentUserEmail){
+            alert("Veuillez vous connecter pour noter un article.");
+            if (targetInput) {
+                targetInput.checked = false;
+            }
+            return;
+        }
+
+        const articleId = articleName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+        const { error } = await supabase
+            .from('ratings')
+            .upsert({
+                user_email: currentUserEmail,
+                article_id: articleId,
+                rating: rating
+            }, { onConflict: 'user_email, article_id' });
+
+        if(error) {
+            console.error("Erreur lors de la notation Supabase:", error);
+            alert("Erreur lors de l'enregistrement de la note. (Veuillez vérifier RLS/UNIQUE Constraint)");
+
+            if (targetInput) {
+                targetInput.checked = false;
+            }
+        } else {
+            if (targetInput) {
+                targetInput.checked = true;
+            }
+            await loadAverageRatings();
+        }
+    }
+
+    // Fonction pour charger la note de l'utilisateur
+    async function loadUserRatings() {
+        if (!currentUserEmail) return;
+
+        document.querySelectorAll('.star-rating input[type="radio"]').forEach(input => input.checked = false);
+
+        const { data, error } = await supabase
+            .from('ratings')
+            .select('article_id, rating')
+            .eq('user_email', currentUserEmail);
+
+        if (error) {
+            console.error("Erreur de chargement des notes utilisateur", error);
+            return;
+        }
+
+        if (data && data.length > 0) {
+            data.forEach(userRating => {
+                if (userRating.rating && userRating.article_id) {
+                    const articleIdClean = userRating.article_id.replace(/[^a-z0-9]/g, '');
+                    const inputId = `star-${userRating.rating}-${articleIdClean}`;
+                    const inputElement = document.getElementById(inputId);
+
+                    if (inputElement) {
+                        inputElement.checked = true;
+                    }
+                }
+            });
+        }
+    }
+
+    // Fonction pour charger et afficher les notes moyennes
+    async function loadAverageRatings() {
+        const articleIds = Array.from(document.querySelectorAll('.card[data-article-id]')).map(card => card.getAttribute('data-article-id'));
+
+        const { data, error } = await supabase
+            .from('ratings')
+            .select('article_id, rating');
+
+        if (error) {
+            console.error("Erreur de chargement des notes moyennes", error);
+            return;
+        }
+
+        const avgRatings = {};
+        const ratingCounts = {};
+
+        if (data) {
+            data.forEach(item => {
+                if (!avgRatings[item.article_id]) {
+                    avgRatings[item.article_id] = 0;
+                    ratingCounts[item.article_id] = 0;
+                }
+                avgRatings[item.article_id] += item.rating;
+                ratingCounts[item.article_id] += 1;
+            });
+        }
+
+        articleIds.forEach(id => {
+            const container = document.getElementById(`avg-rating-${id}`);
+            if (container) {
+                if (ratingCounts[id] && ratingCounts[id] > 0) {
+                    const avg = avgRatings[id] / ratingCounts[id];
+                    const roundedAvg = Math.round(avg * 10) / 10;
+
+                    let stars = '';
+                    for (let i = 1; i <= 5; i++) {
+                        if (i <= Math.round(avg)) {
+                            stars += '★';
+                        } else {
+                            stars += '☆';
+                        }
+                    }
+                    
+                } else {
+                    container.innerText = "";
+                }
+            }
+        });
+    }
+
+    // NOUVEAU: Fonction pour basculer le formulaire de suggestion (Menu dépliant)
+    function toggleSuggestionForm() {
+        const wrapper = document.getElementById('suggestion-content-wrapper');
+        const button = document.getElementById('suggestion-toggle');
+
+        button.classList.toggle('active');
+
+        if (wrapper.style.maxHeight) {
+            // Fermer le menu
+            wrapper.style.maxHeight = null;
+        } else {
+            // Ouvrir le menu
+            // Calcule la hauteur totale du contenu pour l'animation CSS fluide
+            wrapper.style.maxHeight = wrapper.scrollHeight + "px";
+        }
+    }
+
+
+    // Fonction pour soumettre la suggestion
+    document.getElementById('suggestion-form').addEventListener('submit', submitSuggestion);
+
+    async function submitSuggestion(event) {
+        event.preventDefault();
+
+        const statusDiv = document.getElementById('suggestion-status');
+        const title = document.getElementById('suggestion-title').value.trim();
+        const content = document.getElementById('suggestion-content').value.trim();
+
+        statusDiv.style.color = '#ffffff';
+        statusDiv.innerText = 'Envoi en cours...';
+
+        if (!currentUserEmail) {
+            statusDiv.style.color = 'red';
+            statusDiv.innerText = "Veuillez vous connecter pour soumettre une suggestion.";
+            return;
+        }
+
+        if (title.length < 5 || content.length < 10) {
+            statusDiv.style.color = 'red';
+            statusDiv.innerText = "Veuillez entrer un titre (min 5 chars) et des détails (min 10 chars) pour la suggestion.";
+            return;
+        }
+
+        const { error } = await supabase
+            .from('suggestions')
+            .insert([
+                { user_email: currentUserEmail, title: title, content: content }
+            ]);
+
+        if (error) {
+            console.error("Erreur d'envoi de la suggestion:", error);
+            statusDiv.style.color = 'red';
+            statusDiv.innerText = "Erreur lors de l'envoi. Vérifiez les RLS de la table 'suggestions'.";
+        } else {
+            statusDiv.style.color = 'lightgreen';
+            statusDiv.innerText = "Suggestion envoyée avec succès ! Merci de votre contribution.";
+            document.getElementById('suggestion-form').reset(); // Vider le formulaire
+
+            // OPTIONNEL : Fermer le menu après l'envoi
+            setTimeout(() => toggleSuggestionForm(), 2000);
+        }
+    }
+
+
     window.onload = function(){
         google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: handleCredentialResponse });
         google.accounts.id.renderButton( document.getElementById("google-button-container"), {theme:"outline", size:"large", type:"standard"} );
+        loadAverageRatings();
     };
 </script>
 </body>
